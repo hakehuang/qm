@@ -310,26 +310,26 @@ class NXP(TestRail):
 		mstdout = ['']
 		test_cases = TestCase('run_test_configs', '', '', mstdout,'')
 		mproj = self.get_project_by_name(project_name)
-	 	configs = self.get_all_configs(mproj['id'])
-	 	for config in configs:
-	 		inconfig = config
-	 		logging.info("-----------------------------")
-	 		logging.info(inconfig['name'])
-	 		mstdout.insert(-1, str(inconfig['name']))
-	 		logging.info(inconfig['id'])
-	 		mstdout.insert(-1, str(inconfig['id']))
-	 		for item in inconfig['configs']:
-	 			mitems = self.toutf8(item)
-	 			logging.info(mitems['id'])
-	 			mstdout.insert(-1, mitems['id'])
-	 			logging.info(mitems['name'])
-	 			mstdout.insert(-1, mitems['name'])
-	 		frdmk64f_id = self.get_config_item_id_by_name(mproj['id'], inconfig['name'], "frdm_k64f")
-	 		frdmk64_name = self.get_config_item_name_by_id(mproj['id'], inconfig['id'], frdmk64f_id)
-	 		logging.info("frdmk64f id is %s"%(frdmk64f_id))
-	 		mstdout.insert(-1, "frdmk64f id is %s"%(frdmk64f_id))
-	 		if frdmk64f_id == None or frdmk64_name == None:
-	 			test_cases.add_failure_info('get_config_item_id_by_name failure')
+		configs = self.get_all_configs(mproj['id'])
+		for config in configs:
+			inconfig = config
+			logging.info("-----------------------------")
+			logging.info(inconfig['name'])
+			mstdout.insert(-1, str(inconfig['name']))
+			logging.info(inconfig['id'])
+			mstdout.insert(-1, str(inconfig['id']))
+			for item in inconfig['configs']:
+				mitems = self.toutf8(item)
+				logging.info(mitems['id'])
+				mstdout.insert(-1, mitems['id'])
+				logging.info(mitems['name'])
+				mstdout.insert(-1, mitems['name'])
+			frdmk64f_id = self.get_config_item_id_by_name(mproj['id'], inconfig['name'], "frdm_k64f")
+			frdmk64_name = self.get_config_item_name_by_id(mproj['id'], inconfig['id'], frdmk64f_id)
+			logging.info("frdmk64f id is %s"%(frdmk64f_id))
+			mstdout.insert(-1, "frdmk64f id is %s"%(frdmk64f_id))
+			if frdmk64f_id == None or frdmk64_name == None:
+				test_cases.add_failure_info('get_config_item_id_by_name failure')
 
 		return test_cases
 
@@ -342,10 +342,10 @@ class NXP(TestRail):
 		result = self.batch_plan_entry_result(ret["project_name"], ret["plan_name"],
 			ret["board_name"], ret["suite_name"], ret["case_name"], ret["result_id"], ret["log_file_path"])
 
-	 	logging.info("test result %s"%(str(result)))
-	 	mstdout.insert(-1, "test result is %s"%(str(result)))
-	 	if result == None:
-	 		test_cases.add_failure_info('run_test_batch_mode failure')
+		logging.info("test result %s"%(str(result)))
+		mstdout.insert(-1, "test result is %s"%(str(result)))
+		if result == None:
+			test_cases.add_failure_info('run_test_batch_mode failure')
 
 		return test_cases
 
@@ -457,13 +457,13 @@ class NXP(TestRail):
 		logging.info(plan)
 		mstdout.insert(-1, str(plan))
 		cases = self.get_all_cases_by_project_id(mproj['id'],plan['id'])
-	 	for case in cases:
-	 		incase = self.toutf8(case)
-	 		logging.info("-----------------------------")
-	 		logging.info(incase['refs'])
-	 		mstdout.insert(-1, str(incase['refs']))
-	 		logging.info(incase['id'])
-	 		mstdout.insert(-1, str(incase['id']))
+		for case in cases:
+			incase = self.toutf8(case)
+			logging.info("-----------------------------")
+			logging.info(incase['refs'])
+			mstdout.insert(-1, str(incase['refs']))
+			logging.info(incase['id'])
+			mstdout.insert(-1, str(incase['id']))
 		return test_cases
 	def run_test_query(self):
 		mstdout = ['']
