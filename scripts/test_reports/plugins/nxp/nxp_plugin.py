@@ -4,16 +4,16 @@ import glob
 import logging
 import time
 import json
-import HTMLParser
 import coloredlogs
 import urllib
 import pprint
 import yaml
-from nxp_argparser import parse_args
+from .nxp_argparser import parse_args
 from testrail_client import TestRailClient
 from plugins.testrail import TestRail
 from junit_xml import TestSuite, TestCase
 from datetime import datetime
+from html.parser import HTMLParser
 
 try:
     from cStringIO import StringIO      # Python 2

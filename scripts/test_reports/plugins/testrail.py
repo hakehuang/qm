@@ -43,13 +43,13 @@ class TestRail(object):
         :param indata: input data dict
         '''
         if type(indata) is dict:
-            mydict = {unicode(k).encode("utf-8"): unicode(v).encode("utf-8") for k,v in indata.iteritems()}
+            mydict = {str(k).encode("utf-8"): str(v).encode("utf-8") for k,v in indata.iteritems()}
             return mydict
         elif type(indata) is list:
-            mylist = [unicode(v).encode("utf-8") for v in indata]
+            mylist = [str(v).encode("utf-8") for v in indata]
             return mylist
         elif type(indata) is str:
-            mystring = unicode(indata).encode("utf-8")
+            mystring = str(indata).encode("utf-8")
             return mystring
         return indata
 
@@ -57,7 +57,7 @@ class TestRail(object):
         '''
         list all projects
         '''
-    	pl = self.client.project.all()
+        pl = self.client.project.all()
         pl = pl + self.client.project.all(1)
         return pl
 
