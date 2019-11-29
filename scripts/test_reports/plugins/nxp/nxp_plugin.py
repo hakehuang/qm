@@ -14,6 +14,7 @@ from plugins.testrail import TestRail
 from junit_xml import TestSuite, TestCase
 from datetime import datetime
 from html.parser import HTMLParser
+from junitparser import TestCase, TestSuite, JUnitXml, Skipped, Error
 
 try:
     from cStringIO import StringIO      # Python 2
@@ -43,6 +44,8 @@ class NXP(TestRail):
     NXP extension of test rails plugin
 	'''
 	def __init__(self, argparser, user = "hake.huang@nxp.com"):
+		reload(sys)  
+		sys.setdefaultencoding('utf8')   
 		logging.info('init nxp plugin')
 		coloredlogs.install()
 		iargparser = parse_args()
@@ -110,6 +113,12 @@ class NXP(TestRail):
 			return True
 		elif self.mode == 3:
 			self.add_result_for_run(run_id, case_id, result_id, details)
+		elif self.mode == 4:
+			ret = self.parse_batch_string(self.batch)
+			#here case_name is used for junifile name
+			self.batch_junitfile(ret["project_name"], ret["plan_name"],
+				ret["board_name"], ret["suite_name"], ret["case_name"])
+			return True
 		elif self.mode == 0:
 			if self.batch == "":
 				print("need provide parameter by -M ")
@@ -158,6 +167,8 @@ class NXP(TestRail):
 			projs = self.list_projects()
 			for proj in projs:
 				logging.info(proj)
+				if proj['id'] != 3:
+					next
 				sections = self.get_all_sections_by_project_id(proj['id'])
 				#print(sections)
 				for k,v in sections.iteritems():
@@ -166,11 +177,9 @@ class NXP(TestRail):
 						print("section parent name is " +  sections[v['parent_id']]['name'])
 						need_tab = True
 					if need_tab:
-						print("\tsection id is " + k)
-						print("\tsection name is " + v['name'])
+						print("\tsection id is " + k + "\tsection name is " + v['name'])
 					else:
-						print("section id is " + k)
-						print("section name is " + v['name'])
+						print("section id is " + k + " section name is " + v['name'])
 			return True
 		elif self.query.upper() == "CASES":
 			projs = self.list_projects()
@@ -233,7 +242,7 @@ class NXP(TestRail):
 
 	def parse_batch_string(self, batch_string):
 		ret = {}
-		batch = batch_string.split(",")
+		batch_settings = batch_string.split(",")
 		ret["project_name"]  = batch_settings[0]
 		ret["plan_name"]     = batch_settings[1]
 		ret["board_name"]    = batch_settings[2]
@@ -303,6 +312,60 @@ class NXP(TestRail):
 				run_log_content = f.readlines()
 			logging.info(run_log_content)
 		result = self.set_result(run_id, caseids[0], result_id, 'set result by auto test.\r\n ' + str(run_log_content))
+		return result
+
+	def batch_junitfile(self, project_name, plan_name, board_name, suite_name, junitfile, version = "v2.1.0"):
+		mproj = self.get_project_by_name(project_name)
+		mplan = self.create_test_plan(mproj['id'], project_name, plan_name)
+		#logging.info("plan is %s", mplan['id'])
+		myid = self.get_user_id()
+		config_ids = self.get_config_item_id_by_name(mproj['id'], "Boards", board_name)
+		#logging.info(config_ids)
+		
+		msuite = self.get_suite_by_name(mproj['id'], suite_name)
+
+		#parse junit here
+		junit_xml = JUnitXml.fromfile(junitfile)
+		case_lists = []
+		for suite in junit_xml:
+			for testcase in suite:
+				if testcase == None:
+					continue
+				case_name = testcase.name
+				logging.info("************************")
+				logging.info(case_name)
+
+				if testcase.result and testcase.result.type == 'error' and testcase.result.message == 'Infrastructure':
+					result_id = 8
+				elif testcase.result and testcase.result.type == 'error':
+					result_id = 9
+				elif testcase.result and testcase.result.type == 'skipped':
+					result_id = 6
+				elif testcase.result and  testcase.result.type == 'failure':
+					result_id = 5
+				else:
+				 	result_id = 1
+				case_id = self.get_case_id_by_ref(case_name, mproj['id'])
+				if case_id == None:
+					logging.info("++++++++++++++++++")
+					logging.info("missing case id for " + case_name)
+					sec_id = self.get_section_id_by_name(mproj['id'], "others")
+					self.add_case_for_project(sec_id, case_name, case_name)
+					case_id = self.get_case_id_by_ref(case_name, mproj['id'])
+				case_lists.insert(len(case_lists), [case_id, case_name, result_id])
+
+		caseids = list(map(lambda x: x[0], case_lists))
+		myruns_settings = [{"include_all": False, "case_ids": caseids, "config_ids": [config_ids[0]]}]
+
+		mentry = self.add_entry_for_plan(mplan['id'], msuite['id'],
+			"zephyr " +  version + " run for " + board_name + " at " + str(datetime.now()),
+			"result imported by junit format", myid, False, caseids, config_ids, myruns_settings)
+		run_id = self.get_run_id_from_entry(mentry)
+		run_log_content = "automation report"
+		for case in case_lists:
+			result = self.set_result(run_id, case[0], case[2], 'set result by auto test.\r\n ' + str(run_log_content))
+		#no permission
+		#self.close_runs_by_id(run_id)
 		return result
 
 

@@ -42,8 +42,9 @@ class TestRail(object):
         covert the indata dict to utf-8
         :param indata: input data dict
         '''
+        print indata
         if type(indata) is dict:
-            mydict = {str(k).encode("utf-8"): str(v).encode("utf-8") for k,v in indata.iteritems()}
+            mydict = {str(k).encode("utf-8"): str(v).encode("utf-8") for k,v in indata.items()}
             return mydict
         elif type(indata) is list:
             mylist = [str(v).encode("utf-8") for v in indata]
@@ -68,7 +69,7 @@ class TestRail(object):
         '''
         #logging.info(type(proj).__name__)
         if type(proj) is dict:
-            mydict = {unicode(k).encode("utf-8"): unicode(v).encode("utf-8") for k,v in proj.iteritems()}
+            mydict = {unicode(k).encode("utf-8"): unicode(v).encode("utf-8") for k,v in proj.items()}
             pp = pprint.PrettyPrinter(indent=4)
             pp.pprint(mydict)
         elif type(proj) is list:
@@ -82,7 +83,7 @@ class TestRail(object):
         '''
         pl = self.list_projects()
         for p in pl:
-            mydict = {unicode(k).encode("utf-8"): unicode(v).encode("utf-8") for k,v in p.iteritems()}
+            mydict = {unicode(k).encode("utf-8"): unicode(v).encode("utf-8") for k,v in p.items()}
             if mydict['name'].upper() == proj_name.upper():
                 logging.info("find project for %s"%(proj_name))
                 return mydict
@@ -98,9 +99,9 @@ class TestRail(object):
         '''
         suites = self.get_all_suites_by_project_id(proj_id)
         for su in suites:
-            mydict = {unicode(k).encode("utf-8"): unicode(v).encode("utf-8") for k,v in su.iteritems()}
+            mydict = {unicode(k).encode("utf-8"): unicode(v).encode("utf-8") for k,v in su.items()}
             if mydict['name'].upper() == suite_name.upper():
-                logging.info("find project for %s"%(suite_name))
+                logging.info("find suite for %s"%(suite_name))
                 return mydict
             else:
                 next
@@ -155,7 +156,7 @@ class TestRail(object):
         suites = self.get_all_suites_by_project_id(proj_id)
         results = {}
         for su in suites:
-            mydict = {unicode(k).encode("utf-8"): unicode(v).encode("utf-8") for k,v in su.iteritems()}
+            mydict = {unicode(k).encode("utf-8"): unicode(v).encode("utf-8") for k,v in su.items()}
             sections = self.get_all_sections_by_suite_id(proj_id, mydict['id'])
             for mysection in sections:
                 ms = self.toutf8(mysection)
@@ -167,7 +168,8 @@ class TestRail(object):
         sections_list = self.get_all_sections_by_project_id(project_id)
         names = section_names.split('.')
         names.reverse()
-        for k, v in sections_list.iteritems():
+        for k, v in sections_list.items():
+            print k, v
             data = v
             for section in names:
                 if data['name'].upper() == section.upper():
@@ -193,7 +195,7 @@ class TestRail(object):
         '''
         plans = self.client.plan.for_project(proj_id)
         for p in plans:
-            mydict = {unicode(k).encode("utf-8"): unicode(v).encode("utf-8") for k,v in p.iteritems()}
+            mydict = {unicode(k).encode("utf-8"): unicode(v).encode("utf-8") for k,v in p.items()}
             if mydict['name'].upper() == plan_name.upper():
                 logging.info("find project for %s"%(plan_name))
                 return mydict
@@ -317,6 +319,12 @@ class TestRail(object):
         assignedto_id=None, include_all=True, case_ids=list(), config_ids=list(), runs=list()):
         return self.client.plan.add_entry(plan_id, suit_id, name , description, 
             assignedto_id, include_all, case_ids, config_ids, runs)
+
+    def close_runs_by_id(self, run_id):
+        return self.client.run.close(run_id)
+
+    def add_case_for_project(self, section_id, title, ref):
+        return self.client.case.add(section_id, title, refs=ref, custom_steps="automation")
 
     def get_run_entry_id(self, entry_dict):
         inner_entry_dict = entry_dict
