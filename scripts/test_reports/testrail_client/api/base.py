@@ -17,11 +17,11 @@ except ImportError:
 http_client.HTTPConnection.debuglevel = 1
 
 # You must initialize logging, otherwise you'll not see debug output.
-logging.basicConfig()
-logging.getLogger().setLevel(logging.NOTSET)
-requests_log = logging.getLogger("requests.packages.urllib3")
-requests_log.setLevel(logging.NOTSET)
-requests_log.propagate = True
+#logging.basicConfig()
+#logging.getLogger().setLevel(logging.NOTSET)
+#requests_log = logging.getLogger("requests.packages.urllib3")
+#requests_log.setLevel(logging.NOTSET)
+#requests_log.propagate = True
 
 def check_execption(func):
     def _check(*arg, **kws):
@@ -68,12 +68,12 @@ class TestRailAPIBase(object):
     def _get(self, url, **opts):
         return requests.get(self.url + url,
                             auth=(self.user_name, self.password),
-                            headers=self.header,
+                            headers=self.header, timeout = 200,
                             **opts)
 
     @check_execption
     def _post(self, url, **opts):
         return requests.post(self.url + url,
                              auth=(self.user_name, self.password),
-                             headers=self.header,
+                             headers=self.header, timeout = 200,
                              **opts)

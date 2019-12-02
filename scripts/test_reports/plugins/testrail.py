@@ -42,7 +42,7 @@ class TestRail(object):
         covert the indata dict to utf-8
         :param indata: input data dict
         '''
-        print indata
+        #print indata
         if type(indata) is dict:
             mydict = {str(k).encode("utf-8"): str(v).encode("utf-8") for k,v in indata.items()}
             return mydict
@@ -169,7 +169,7 @@ class TestRail(object):
         names = section_names.split('.')
         names.reverse()
         for k, v in sections_list.items():
-            print k, v
+            #print k, v
             data = v
             for section in names:
                 if data['name'].upper() == section.upper():
