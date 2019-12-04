@@ -44,8 +44,9 @@ class NXP(TestRail):
     NXP extension of test rails plugin
 	'''
 	def __init__(self, argparser, user = "hake.huang@nxp.com"):
-		reload(sys)  
-		sys.setdefaultencoding('utf8')   
+		if sys.version_info<(3,0,0):
+			reload(sys)
+			sys.setdefaultencoding('utf8')
 		logging.info('init nxp plugin')
 		coloredlogs.install()
 		iargparser = parse_args()
