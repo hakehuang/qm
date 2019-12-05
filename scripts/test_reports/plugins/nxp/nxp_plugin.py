@@ -315,6 +315,13 @@ class NXP(TestRail):
 		result = self.set_result(run_id, caseids[0], result_id, 'set result by auto test.\r\n ' + str(run_log_content))
 		return result
 
+	def case_ref_include(self, case_ref, cases):
+		for case in cases:
+			incase = self.toutf8(case)
+			if incase['refs'] == case_ref:
+				return incase['id']
+		return None
+
 	def batch_junitfile(self, project_name, plan_name, board_name, suite_name, junitfile, version = "v2.1.0"):
 		mproj = self.get_project_by_name(project_name)
 		mplan = self.create_test_plan(mproj['id'], project_name, plan_name)
@@ -324,6 +331,14 @@ class NXP(TestRail):
 		#logging.info(config_ids)
 		
 		msuite = self.get_suite_by_name(mproj['id'], suite_name)
+
+		suites = self.get_all_suites_by_project_id(mproj['id'])
+		cases = []
+		for suite in suites :
+			icases = self.get_all_cases_by_project_id(mproj['id'], suite['id'])
+			cases += icases
+
+
 
 		#parse junit here
 		junit_xml = JUnitXml.fromfile(junitfile)
@@ -346,7 +361,8 @@ class NXP(TestRail):
 					result_id = 5
 				else:
 				 	result_id = 1
-				case_id = self.get_case_id_by_ref(case_name, mproj['id'])
+				case_id = self.case_ref_include(case_name, cases)
+				#case_id = self.get_case_id_by_ref(case_name, mproj['id'])
 				if case_id == None:
 					logging.info("++++++++++++++++++")
 					logging.info("missing case id for " + case_name)

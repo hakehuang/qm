@@ -68,12 +68,12 @@ class TestRailAPIBase(object):
     def _get(self, url, **opts):
         return requests.get(self.url + url,
                             auth=(self.user_name, self.password),
-                            headers=self.header, timeout = 200,
+                            headers=self.header, timeout = 400,
                             **opts)
 
     @check_execption
     def _post(self, url, **opts):
         return requests.post(self.url + url,
                              auth=(self.user_name, self.password),
-                             headers=self.header, timeout = 200,
+                             headers=self.header, timeout = 400,
                              **opts)
