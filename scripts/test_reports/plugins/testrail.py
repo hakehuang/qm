@@ -272,7 +272,7 @@ class TestRail(object):
         return self.client.config.get(proj_id)
         
 
-    def get_configurations_id_by_name(self, proj_id):
+    def get_configurations_id_by_name(self, proj_id, config_name):
         '''
         get configuration id by name
         :param proj_id: project id
@@ -297,6 +297,18 @@ class TestRail(object):
             if mconfig['id'] == config_id:
                 return mconfig['name']
         return None
+
+    def create_config(self, projec_id, config_name, config_group_name = "Boards"):
+        '''
+        create configuration
+        :param proj_id: project id
+        :param config_name: name of config
+        '''
+        config_id = self.get_configurations_id_by_name(projec_id, config_name)
+        if config_id == None:
+            config_group_id = self.get_configurations_id_by_name(projec_id, config_group_name)
+            return self.client.config.add(config_group_id, config_name)
+        return config_id
 
     def create_test_run_for_suite(self, proj_id, suite_id, run_name):
         return self.client.run.add(proj_id, suite_id, run_name)

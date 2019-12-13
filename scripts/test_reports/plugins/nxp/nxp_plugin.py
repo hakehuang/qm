@@ -11,10 +11,10 @@ import yaml
 from .nxp_argparser import parse_args
 from testrail_client import TestRailClient
 from plugins.testrail import TestRail
-from junit_xml import TestSuite, TestCase
 from datetime import datetime
 from html.parser import HTMLParser
-from junitparser import TestCase, TestSuite, JUnitXml, Skipped, Error
+from junitparser import JUnitXml
+from junit_xml import TestSuite, TestCase
 
 try:
     from cStringIO import StringIO      # Python 2
@@ -63,6 +63,7 @@ class NXP(TestRail):
 		self.batch = iargparser.batch
 		self.query = iargparser.query
 		self.project = iargparser.project
+		self.boardname = iargparser.boardname
 		logging.info('init NXP plugin')
 
 	def process(self, args):
@@ -110,15 +111,20 @@ class NXP(TestRail):
 			self.create_plan(self.pname)
 			return True
 		elif self.mode == 2:
-			self.create_entry_for_plan(project_id, plan_id, board_name, case_ref_names, suite_name)
+			ret = self.parse_batch_string(self.batch)
+			plan = self.get_test_plan_by_name(ret["plan_name"])
+			self.create_entry_for_plan(ret["project_name"], plan['id'], ret["board_name"], ret["case_name"], ret["suite_name"])
 			return True
 		elif self.mode == 3:
-			self.add_result_for_run(run_id, case_id, result_id, details)
+			return True
 		elif self.mode == 4:
 			ret = self.parse_batch_string(self.batch)
 			#here case_name is used for junifile name
 			self.batch_junitfile(ret["project_name"], ret["plan_name"],
 				ret["board_name"], ret["suite_name"], ret["case_name"])
+			return True
+		elif self.mode == 5:
+			self.create_config(self.project, self.boardname)
 			return True
 		elif self.mode == 0:
 			if self.batch == "":
@@ -394,15 +400,16 @@ class NXP(TestRail):
 		for config in configs:
 			inconfig = config
 			logging.info("-----------------------------")
+			logging.info(inconfig)
 			logging.info(inconfig['name'])
 			mstdout.insert(-1, str(inconfig['name']))
 			logging.info(inconfig['id'])
 			mstdout.insert(-1, str(inconfig['id']))
 			for item in inconfig['configs']:
 				mitems = self.toutf8(item)
-				logging.info(mitems['id'])
+				logging.info(".." + mitems['id'])
 				mstdout.insert(-1, mitems['id'])
-				logging.info(mitems['name'])
+				logging.info(".." + mitems['name'])
 				mstdout.insert(-1, mitems['name'])
 			frdmk64f_id = self.get_config_item_id_by_name(mproj['id'], inconfig['name'], "frdm_k64f")
 			frdmk64_name = self.get_config_item_name_by_id(mproj['id'], inconfig['id'], frdmk64f_id)
